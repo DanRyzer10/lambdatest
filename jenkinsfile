@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm 
+            }
+        }
+
+        stage('Instalar Dependencias') {
+            steps {
+                sh 'npm install'
+            }
+        }
+
+        stage('Despliegue a AWS') {
+            steps {
+                sh 'npx serverless deploy --stage prod'
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo '¡Despliegue completado con éxito!'
+        }
+        failure {
+            echo 'Algo falló en el proceso. Revisa los logs.'
+        }
+    }
+}

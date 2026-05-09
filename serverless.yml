@@ -1,0 +1,12 @@
+service: mi-lambda-jenkins
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+
+functions:
+  hello:
+    handler: handler.handler
+
+plugins:
+  - serverless-plugin-typescript
