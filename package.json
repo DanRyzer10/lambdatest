@@ -1,0 +1,26 @@
+{
+  "name": "lamdatest",
+  "version": "1.0.0",
+  "description": "Base template for an AWS Lambda function in TypeScript",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch scripts/dev.ts",
+    "start": "node dist/index.js",
+    "test": "npm run typecheck",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "aws-lambda": "^1.0.7"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.151",
+    "@types/node": "^22.15.29",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}
