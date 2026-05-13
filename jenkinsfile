@@ -1,4 +1,62 @@
 pipeline {
+  agent { docker { image 'node:24' } }
+  options { timestamps() }
+  parameters {
+    string(name: 'RESEND_TO', defaultValue: 'you@example.com', description: 'Comma-separated recipient emails')
+    string(name: 'STAGE', defaultValue: 'dev', description: 'Serverless stage to deploy')
+  }
+  environment {
+    NODE_ENV = 'production'
+  }
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout([$class: 'GitSCM', 
+            branches: [[name: '*/main']], 
+            userRemoteConfigs: [[
+                url: 'git@github.com:DanRyzer10/lambdatest.git', 
+                credentialsId: 'github-ssh-key'
+            ]]
+        ])
+    }
+    }
+    stage('Install') {
+      steps { sh 'npm ci' }
+    }
+    stage('Unit Tests') {
+      steps { sh 'npm test' }
+    }
+    stage('Deploy') {
+      steps {
+        script {
+          withCredentials([
+            string(credentialsId: 'aws-access-key', variable: 'AWS_ACCESS_KEY_ID'),
+            string(credentialsId: 'aws-secret-key', variable: 'AWS_SECRET_ACCESS_KEY'),
+            string(credentialsId: 'resend_api_key', variable: 'RESEND_API_KEY')
+          ]) {
+            sh '''
+              export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+              export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+              npx serverless deploy --stage ${STAGE}
+            '''
+          }
+        }
+      }
+    }
+  }
+  post {
+    always {
+        script {
+            withCredentials([string(credentialsId: 'resend_api_key', variable: 'RESEND_API_KEY')]) {
+                env.BUILD_STATUS = currentBuild.currentResult
+                sh "node scripts/send_resend_email.js '${params.RESEND_TO}' 'Pipeline Status: ${env.BUILD_STATUS}' 'El pipeline ha finalizado con estado: ${env.BUILD_STATUS}. Revisa los logs en Jenkins para más detalles.' || true"
+            }
+        }
+
+    }
+  }
+}
+pipeline {
     agent any
 
     environment {
