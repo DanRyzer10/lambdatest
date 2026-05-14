@@ -3,7 +3,6 @@ pipeline {
   options { timestamps() }
   parameters {
     string(name: 'RESEND_TO', defaultValue: 'angeldaniel6709@gmail.com', description: 'Comma-separated recipient emails')
-
     string(name: 'STAGE', defaultValue: 'dev', description: 'Serverless stage to deploy')
   }
   environment {
@@ -19,13 +18,25 @@ pipeline {
                 credentialsId: 'github-ssh-key'
             ]]
         ])
+      }
     }
+    stage('Clean Cache') {
+      steps {
+        sh '''
+          npm cache clean --force
+          rm -rf node_modules package-lock.json || true
+        '''
+      }
     }
     stage('Install') {
-      steps { sh 'npm ci' }
+      steps { 
+        sh 'npm install'
+      }
     }
     stage('Unit Tests') {
-      steps { sh 'npm test' }
+      steps { 
+        sh 'npm test' 
+      }
     }
     stage('Deploy') {
       steps {
@@ -47,50 +58,12 @@ pipeline {
   }
   post {
     always {
-        script {
-            withCredentials([string(credentialsId: 'resend_api_key', variable: 'RESEND_API_KEY')]) {
-                env.BUILD_STATUS = currentBuild.currentResult
-                sh "node scripts/send_resend_email.js '${params.RESEND_TO}' 'Pipeline Status: ${env.BUILD_STATUS}' 'El pipeline ha finalizado con estado: ${env.BUILD_STATUS}. Revisa los logs en Jenkins para más detalles.' || true"
-            }
+      script {
+        withCredentials([string(credentialsId: 'resend_api_key', variable: 'RESEND_API_KEY')]) {
+          env.BUILD_STATUS = currentBuild.currentResult
+          sh "node scripts/send_resend_email.js '${params.RESEND_TO}' 'Pipeline Status: ${env.BUILD_STATUS}' 'El pipeline ha finalizado con estado: ${env.BUILD_STATUS}. Revisa los logs en Jenkins para más detalles.' || true"
         }
-
+      }
     }
   }
-}
-pipeline {
-    agent any
-
-    environment {
-        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
-        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
-    }
-
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout scm 
-            }
-        }
-
-        stage('Instalar Dependencias') {
-            steps {
-                sh 'npm install'
-            }
-        }
-
-        stage('Despliegue a AWS') {
-            steps {
-                sh 'npx serverless deploy --stage prod'
-            }
-        }
-    }
-    
-    post {
-        success {
-            echo '¡Despliegue completado con éxito!'
-        }
-        failure {
-            echo 'Algo falló en el proceso. Revisa los logs.'
-        }
-    }
 }
