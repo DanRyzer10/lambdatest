@@ -15,7 +15,7 @@ if (!apiKey) {
 }
 
 let  html = fs.readFileSync("./scripts/mail-template.html", "utf-8");
-const isSucces = process.env.BUILD_STATUS === 'SUCCESS';
+const isSuccess = process.env.BUILD_STATUS === 'SUCCESS';
 const placeholders = {
     '{{project}}': process.env.JOB_NAME,
     '{{status}}': isSuccess ? 'Despliegue Exitoso' : 'Fallo en el Pipeline',
