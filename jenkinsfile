@@ -20,17 +20,12 @@ pipeline {
         ])
       }
     }
-    stage('Clean Cache') {
+    stage('Install') {
       steps {
         sh '''
           npm cache clean --force
-          rm -rf node_modules package-lock.json || true
+          npm ci --verbose
         '''
-      }
-    }
-    stage('Install') {
-      steps { 
-        sh 'npm install'
       }
     }
     stage('Unit Tests') {

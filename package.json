@@ -4,7 +4,7 @@
   "description": "Base template for an AWS Lambda function in TypeScript",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "npx tsc -p tsconfig.json",
     "dev": "tsx watch scripts/dev.ts",
     "start": "node dist/index.js",
     "test": "npm run typecheck",
