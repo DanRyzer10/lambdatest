@@ -2,7 +2,7 @@ pipeline {
   agent { docker { image 'node:24' } }
   options { timestamps() }
   parameters {
-    string(name: 'RESEND_TO', defaultValue: 'you@example.com', description: 'Comma-separated recipient emails')
+    string(name: 'RESEND_TO', defaultValue: 'angeldaniel6709@gmail.com', description: 'Comma-separated recipient emails')
     string(name: 'STAGE', defaultValue: 'dev', description: 'Serverless stage to deploy')
   }
   environment {
