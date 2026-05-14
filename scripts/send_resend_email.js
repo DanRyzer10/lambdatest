@@ -6,13 +6,16 @@ if (!recipients) {
   console.error('Uso: node send_resend_email.js <comma_emails> <subject> <body>');
   process.exit(1);
 }
-const apiKey = "re_URaZ56te_5yqnzaVPwwC1qnY5D4aBGzVB";
+
+const apiKey = process.env.RESEND_API_KEY;
+
 if (!apiKey) {
   console.error('RESEND_API_KEY no está definido en el entorno');
   process.exit(2);
 }
+
 let  html = fs.readFileSync("mail-template.html", "utf-8");
-const isSuccess = true;
+const isSucces = process.env.BUILD_STATUS === 'SUCCESS';
 const placeholders = {
     '{{project}}': process.env.JOB_NAME,
     '{{status}}': isSuccess ? 'Despliegue Exitoso' : 'Fallo en el Pipeline',
