@@ -3,6 +3,7 @@ pipeline {
   options { timestamps() }
   parameters {
     string(name: 'RESEND_TO', defaultValue: 'angeldaniel6709@gmail.com', description: 'Comma-separated recipient emails')
+
     string(name: 'STAGE', defaultValue: 'dev', description: 'Serverless stage to deploy')
   }
   environment {
