@@ -23,8 +23,10 @@ pipeline {
     stage('Install') {
       steps {
         sh '''
-          npm cache clean --force
-          npm ci --verbose
+          mkdir -p .npm-cache
+          chmod 777 .npm-cache || true
+          rm -f .npm-cache/.npmrc.lock || true
+          npm ci --prefer-offline --no-audit
         '''
       }
     }
